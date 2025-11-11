@@ -13,7 +13,9 @@ export interface User {
   role: 'client' | 'freelancer';
   avatar?: string;
   bio?: string;
-  skills?: string;
+  location?: string;
+  rating?: number;
+  isVerified?: boolean;
 }
 
 export interface AuthUser extends User {
@@ -51,12 +53,13 @@ export function verifyToken(token: string): any {
 // Create user
 export async function createUser(email: string, password: string, name: string, role: 'client' | 'freelancer' = 'client') {
   const hashedPassword = await hashPassword(password);
+  const roleId = role === 'client' ? 1 : 2;
 
   const result = await db.insert(users).values({
     email,
-    password: hashedPassword,
+    passwordHash: hashedPassword,
     name,
-    role,
+    roleId,
   }).returning();
 
   return result[0];
@@ -71,20 +74,23 @@ export async function authenticateUser(email: string, password: string): Promise
   }
 
   const user = result[0];
-  const isValidPassword = await verifyPassword(password, user.password);
+  const isValidPassword = await verifyPassword(password, user.passwordHash);
 
   if (!isValidPassword) {
     return null;
   }
 
+  const roleMap: { [key: number]: 'client' | 'freelancer' } = { 1: 'client', 2: 'freelancer' };
   const userData: User = {
     id: user.id,
     email: user.email,
     name: user.name,
-    role: user.role as 'client' | 'freelancer',
-    avatar: user.avatar || undefined,
+    role: roleMap[user.roleId] || 'client',
+    avatar: user.avatarUrl || undefined,
     bio: user.bio || undefined,
-    skills: user.skills || undefined,
+    location: user.location || undefined,
+    rating: parseFloat(user.rating) || 0,
+    isVerified: user.isVerified,
   };
 
   return {
@@ -102,13 +108,16 @@ export async function getUserById(id: number): Promise<User | null> {
   }
 
   const user = result[0];
+  const roleMap: { [key: number]: 'client' | 'freelancer' } = { 1: 'client', 2: 'freelancer' };
   return {
     id: user.id,
     email: user.email,
     name: user.name,
-    role: user.role as 'client' | 'freelancer',
-    avatar: user.avatar || undefined,
+    role: roleMap[user.roleId] || 'client',
+    avatar: user.avatarUrl || undefined,
     bio: user.bio || undefined,
-    skills: user.skills || undefined,
+    location: user.location || undefined,
+    rating: parseFloat(user.rating) || 0,
+    isVerified: user.isVerified,
   };
 }

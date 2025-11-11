@@ -63,6 +63,15 @@
 						Dashboard
 					</a>
 
+					{#if user.role === 'admin'}
+						<a
+							href="/admin"
+							class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors {$page.url.pathname.startsWith('/admin') ? 'text-blue-600' : ''}"
+						>
+							Admin
+						</a>
+					{/if}
+
 					{#if user.role === 'client'}
 						<a
 							href="/project/new"
