@@ -2,10 +2,13 @@
 	import type { Project, Bid } from '$lib/types';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
+	import QRISPayment from '$lib/QRISPayment.svelte';
 
 	let project: Project | null = null;
 	let bids: Bid[] = [];
 	let loading = true;
+	let showPaymentModal = false;
+	let selectedBid: Bid | null = null;
 
 	// Pagination state
 	let currentPage = 1;
@@ -198,6 +201,16 @@
 		// In production, this would open a modal or navigate to bid form
 		alert('Bid submission feature coming soon!');
 	}
+
+	function payForBid(bid: Bid) {
+		selectedBid = bid;
+		showPaymentModal = true;
+	}
+
+	function closePaymentModal() {
+		showPaymentModal = false;
+		selectedBid = null;
+	}
 </script>
 
 {#if loading}
@@ -311,6 +324,14 @@
 											{/each}
 										</div>
 									{/if}
+									<div class="mt-3 flex justify-end">
+										<button
+											class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+											on:click={() => payForBid(bid)}
+										>
+											Bayar Sekarang
+										</button>
+									</div>
 								</div>
 							{/each}
 						</div>
@@ -413,6 +434,57 @@
 			<a href="/" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
 				Back to Projects
 			</a>
+		</div>
+	</div>
+{/if}
+
+<!-- Payment Modal -->
+{#if showPaymentModal && selectedBid}
+	<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+		<div class="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+			<div class="p-6">
+				<div class="flex justify-between items-center mb-4">
+					<h3 class="text-lg font-semibold text-gray-900">Pembayaran QRIS</h3>
+					<button
+						class="text-gray-400 hover:text-gray-600"
+						on:click={closePaymentModal}
+						aria-label="Tutup modal pembayaran"
+					>
+						<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+						</svg>
+					</button>
+				</div>
+
+				<div class="mb-4">
+					<p class="text-sm text-gray-600 mb-2">Project:</p>
+					<p class="font-medium text-gray-900">{project?.title}</p>
+				</div>
+
+				<div class="mb-4">
+					<p class="text-sm text-gray-600 mb-2">Freelancer:</p>
+					<p class="font-medium text-gray-900">{selectedBid.freelancer.name}</p>
+				</div>
+
+				<div class="mb-6">
+					<p class="text-sm text-gray-600 mb-2">Total Pembayaran:</p>
+					<p class="text-2xl font-bold text-green-600">
+						Rp {selectedBid.amount.toLocaleString('id-ID')}
+					</p>
+				</div>
+
+				<QRISPayment
+					projectId={selectedBid.projectId}
+					amount={selectedBid.amount}
+					description={`Pembayaran untuk project: ${project?.title}`}
+					onPaymentSuccess={() => {
+						closePaymentModal();
+						// Refresh page or update UI
+						window.location.reload();
+					}}
+					onPaymentCancel={closePaymentModal}
+				/>
+			</div>
 		</div>
 	</div>
 {/if}

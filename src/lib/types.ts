@@ -64,6 +64,165 @@ export interface Review {
   createdAt?: Date;
 }
 
+// LMS Types
+export interface CourseCategory {
+  id: number;
+  name: string;
+  slug: string;
+  description?: string;
+  icon?: string;
+  color?: string;
+  courseCount?: number;
+}
+
+export interface Course {
+  id: number;
+  title: string;
+  slug: string;
+  description: string;
+  shortDescription?: string;
+  thumbnailUrl?: string;
+  instructorId: number;
+  instructor?: User;
+  categoryId?: number;
+  category?: CourseCategory;
+  price: number;
+  originalPrice?: number;
+  level: 'beginner' | 'intermediate' | 'advanced';
+  status: 'draft' | 'published' | 'archived';
+  duration: number; // in minutes
+  language: string;
+  prerequisites?: string;
+  learningObjectives?: string[];
+  tags?: string[];
+  isFree: boolean;
+  isFeatured: boolean;
+  enrollmentCount: number;
+  rating: number;
+  reviewCount: number;
+  modules?: CourseModule[];
+  createdAt?: Date;
+  updatedAt?: Date;
+  publishedAt?: Date;
+}
+
+export interface CourseModule {
+  id: number;
+  courseId: number;
+  title: string;
+  description?: string;
+  order: number;
+  duration: number;
+  lessons?: CourseLesson[];
+  createdAt?: Date;
+}
+
+export interface CourseLesson {
+  id: number;
+  moduleId: number;
+  title: string;
+  description?: string;
+  type: 'video' | 'text' | 'quiz' | 'assignment' | 'live_session';
+  content?: string;
+  videoUrl?: string;
+  duration: number;
+  order: number;
+  isPreview: boolean;
+  attachments?: any[];
+  quiz?: CourseQuiz;
+  progress?: LessonProgress;
+  createdAt?: Date;
+}
+
+export interface CourseEnrollment {
+  id: number;
+  courseId: number;
+  course?: Course;
+  studentId: number;
+  student?: User;
+  status: 'active' | 'completed' | 'cancelled' | 'expired';
+  progress: number; // 0-100
+  enrolledAt?: Date;
+  completedAt?: Date;
+  lastAccessedAt?: Date;
+  certificateUrl?: string;
+  lessonProgress?: LessonProgress[];
+  createdAt?: Date;
+}
+
+export interface LessonProgress {
+  id: number;
+  enrollmentId: number;
+  lessonId: number;
+  isCompleted: boolean;
+  timeSpent: number;
+  lastPosition: number;
+  completedAt?: Date;
+  createdAt?: Date;
+}
+
+export interface CourseReview {
+  id: number;
+  courseId: number;
+  studentId: number;
+  student?: User;
+  rating: number;
+  review?: string;
+  isVerified: boolean;
+  createdAt?: Date;
+}
+
+export interface CourseQuiz {
+  id: number;
+  lessonId: number;
+  title: string;
+  description?: string;
+  passingScore: number;
+  timeLimit?: number;
+  attemptsAllowed: number;
+  isRequired: boolean;
+  questions?: QuizQuestion[];
+  createdAt?: Date;
+}
+
+export interface QuizQuestion {
+  id: number;
+  quizId: number;
+  question: string;
+  type: string;
+  options?: any[];
+  correctAnswer?: any;
+  explanation?: string;
+  points: number;
+  order: number;
+  createdAt?: Date;
+}
+
+export interface QuizAttempt {
+  id: number;
+  enrollmentId: number;
+  quizId: number;
+  score: number;
+  maxScore: number;
+  percentage: number;
+  passed: boolean;
+  startedAt?: Date;
+  completedAt?: Date;
+  timeSpent?: number;
+  createdAt?: Date;
+}
+
+export interface Certificate {
+  id: number;
+  enrollmentId: number;
+  certificateNumber: string;
+  issuedAt?: Date;
+  expiresAt?: Date;
+  downloadUrl?: string;
+  isActive: boolean;
+  createdAt?: Date;
+}
+
 // Forum types
 export interface ForumCategory {
   id: number;
@@ -159,6 +318,35 @@ export type ProjectCategory = typeof PROJECT_CATEGORIES[number];
 export const PROJECT_STATUSES = ['open', 'in_progress', 'completed', 'cancelled'] as const;
 export const BID_STATUSES = ['pending', 'accepted', 'rejected'] as const;
 export const PAYMENT_STATUSES = ['pending', 'completed', 'failed'] as const;
+
+// LMS Constants
+export const COURSE_LEVELS = ['beginner', 'intermediate', 'advanced'] as const;
+export const COURSE_STATUSES = ['draft', 'published', 'archived'] as const;
+export const ENROLLMENT_STATUSES = ['active', 'completed', 'cancelled', 'expired'] as const;
+export const LESSON_TYPES = ['video', 'text', 'quiz', 'assignment', 'live_session'] as const;
+export const QUIZ_QUESTION_TYPES = ['multiple_choice', 'true_false', 'short_answer'] as const;
+
+export const COURSE_CATEGORIES = [
+  'Web Development',
+  'Mobile Development',
+  'UI/UX Design',
+  'Graphic Design',
+  'Digital Marketing',
+  'Data Science',
+  'Programming',
+  'Business',
+  'Photography',
+  'Writing',
+  'Translation',
+  'Other',
+] as const;
+
+export type CourseLevel = typeof COURSE_LEVELS[number];
+export type CourseStatus = typeof COURSE_STATUSES[number];
+export type EnrollmentStatus = typeof ENROLLMENT_STATUSES[number];
+export type LessonType = typeof LESSON_TYPES[number];
+export type QuizQuestionType = typeof QUIZ_QUESTION_TYPES[number];
+export type CourseCategoryType = typeof COURSE_CATEGORIES[number];
 
 // Utility types
 export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;

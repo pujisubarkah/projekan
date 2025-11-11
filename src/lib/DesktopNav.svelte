@@ -42,6 +42,13 @@
 				</a>
 
 				<a
+					href="/courses"
+					class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors {$page.url.pathname.startsWith('/courses') ? 'text-blue-600' : ''}"
+				>
+					Courses
+				</a>
+
+				<a
 					href="/forum"
 					class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors {$page.url.pathname === '/forum' ? 'text-blue-600' : ''}"
 				>

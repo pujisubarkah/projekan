@@ -36,6 +36,7 @@
 		"drizzle-kit": "^0.31.6",
 		"drizzle-orm": "^0.44.7",
 		"jsonwebtoken": "^9.0.2",
-		"postgres": "^3.4.7"
+		"postgres": "^3.4.7",
+		"xendit-node": "^7.0.0"
 	}
 }
