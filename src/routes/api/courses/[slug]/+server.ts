@@ -1,8 +1,10 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { db } from '$lib/db';
-import { courses, courseCategories, users, courseModules, courseLessons, courseReviews } from '$lib/schema';
-import { eq, and, desc } from 'drizzle-orm';
+// import { db } from '$lib/db';
+// import * as schema from '$lib/schema';
+// const { course, courseModule, courseLesson, courseReview, courseCategory } = schema;
+// import { user } from '$lib/userSchema';
+// import { eq, and, desc } from 'drizzle-orm';
 
 export const GET: RequestHandler = async ({ params }) => {
   try {
@@ -18,48 +20,94 @@ export const GET: RequestHandler = async ({ params }) => {
       );
     }
 
+    // For now, return mock data since LMS schema is not implemented in SQLite
+    // TODO: Implement course fetching when LMS schema is added
+    return json({
+      success: true,
+      data: {
+        id: 1,
+        title: 'Course Not Available',
+        slug,
+        description: 'This course is temporarily unavailable. LMS features are under development.',
+        shortDescription: 'Course temporarily disabled',
+        thumbnailUrl: null,
+        price: 0,
+        originalPrice: null,
+        level: 'beginner',
+        status: 'draft',
+        duration: 0,
+        language: 'id',
+        prerequisites: null,
+        learningObjectives: [],
+        tags: [],
+        isFree: true,
+        isFeatured: false,
+        enrollmentCount: 0,
+        rating: 0,
+        reviewCount: 0,
+        createdAt: new Date().toISOString(),
+        publishedAt: null,
+        instructor: {
+          id: 1,
+          name: 'System',
+          bio: 'Course system under development',
+          avatarUrl: null,
+          rating: 0,
+        },
+        category: {
+          id: 1,
+          name: 'Development',
+          slug: 'development',
+        },
+        modules: [],
+        reviews: [],
+      },
+    });
+
+    // Original code commented out until LMS schema is implemented
+    /*
     // Get course with instructor and category
     const courseData = await db
       .select({
-        id: courses.id,
-        title: courses.title,
-        slug: courses.slug,
-        description: courses.description,
-        shortDescription: courses.shortDescription,
-        thumbnailUrl: courses.thumbnailUrl,
-        price: courses.price,
-        originalPrice: courses.originalPrice,
-        level: courses.level,
-        status: courses.status,
-        duration: courses.duration,
-        language: courses.language,
-        prerequisites: courses.prerequisites,
-        learningObjectives: courses.learningObjectives,
-        tags: courses.tags,
-        isFree: courses.isFree,
-        isFeatured: courses.isFeatured,
-        enrollmentCount: courses.enrollmentCount,
-        rating: courses.rating,
-        reviewCount: courses.reviewCount,
-        createdAt: courses.createdAt,
-        publishedAt: courses.publishedAt,
+        id: course.id,
+        title: course.title,
+        slug: course.slug,
+        description: course.description,
+        shortDescription: course.shortDescription,
+        thumbnailUrl: course.thumbnailUrl,
+        price: course.price,
+        originalPrice: course.originalPrice,
+        level: course.level,
+        status: course.status,
+        duration: course.duration,
+        language: course.language,
+        prerequisites: course.prerequisites,
+        learningObjectives: course.learningObjectives,
+        tags: course.tags,
+        isFree: course.isFree,
+        isFeatured: course.isFeatured,
+        enrollmentCount: course.enrollmentCount,
+        rating: course.rating,
+        reviewCount: course.reviewCount,
+        createdAt: course.createdAt,
+        publishedAt: course.publishedAt,
         instructor: {
-          id: users.id,
-          name: users.name,
-          bio: users.bio,
-          avatarUrl: users.avatarUrl,
-          rating: users.rating,
+          id: user.id,
+          name: user.name,
+          bio: user.bio,
+          avatarUrl: user.avatarUrl,
+          rating: user.rating,
         },
         category: {
-          id: courseCategories.id,
-          name: courseCategories.name,
-          slug: courseCategories.slug,
+          id: courseCategory.id,
+          name: courseCategory.name,
+          slug: courseCategory.slug,
         },
       })
-      .from(courses)
-      .leftJoin(users, eq(courses.instructorId, users.id))
-      .leftJoin(courseCategories, eq(courses.categoryId, courseCategories.id))
-      .where(and(eq(courses.slug, slug), eq(courses.status, 'published')))
+      .from(course)
+      .leftJoin(user, eq(course.instructorId, user.id))
+      .leftJoin(courseCategory, eq(course.categoryId, courseCategory.id))
+      .where(and(eq(course.slug, slug), eq(course.status, 'published')))
       .limit(1);
 
     if (courseData.length === 0) {
@@ -77,25 +125,25 @@ export const GET: RequestHandler = async ({ params }) => {
     // Get course modules with lessons
     const modulesData = await db
       .select({
-        id: courseModules.id,
-        title: courseModules.title,
-        description: courseModules.description,
-        order: courseModules.order,
-        duration: courseModules.duration,
+        id: courseModule.id,
+        title: courseModule.title,
+        description: courseModule.description,
+        order: courseModule.order,
+        duration: courseModule.duration,
         lessons: {
-          id: courseLessons.id,
-          title: courseLessons.title,
-          description: courseLessons.description,
-          type: courseLessons.type,
-          duration: courseLessons.duration,
-          order: courseLessons.order,
-          isPreview: courseLessons.isPreview,
+          id: courseLesson.id,
+          title: courseLesson.title,
+          description: courseLesson.description,
+          type: courseLesson.type,
+          duration: courseLesson.duration,
+          order: courseLesson.order,
+          isPreview: courseLesson.isPreview,
         },
       })
-      .from(courseModules)
-      .leftJoin(courseLessons, eq(courseModules.id, courseLessons.moduleId))
-      .where(eq(courseModules.courseId, course.id))
-      .orderBy(courseModules.order, courseLessons.order);
+      .from(courseModule)
+      .leftJoin(courseLesson, eq(courseModule.id, courseLesson.moduleId))
+      .where(eq(courseModule.courseId, course.id))
+      .orderBy(courseModule.order, courseLesson.order);
 
     // Group lessons by module
     const modules = modulesData.reduce((acc: any[], item) => {
@@ -115,24 +163,24 @@ export const GET: RequestHandler = async ({ params }) => {
       return acc;
     }, []);
 
-    // Get course reviews
+// Get course reviews
     const reviewsData = await db
       .select({
-        id: courseReviews.id,
-        rating: courseReviews.rating,
-        review: courseReviews.review,
-        isVerified: courseReviews.isVerified,
-        createdAt: courseReviews.createdAt,
+        id: courseReview.id,
+        rating: courseReview.rating,
+        review: courseReview.review,
+        isVerified: courseReview.isVerified,
+        createdAt: courseReview.createdAt,
         student: {
-          id: users.id,
-          name: users.name,
-          avatarUrl: users.avatarUrl,
+          id: user.id,
+          name: user.name,
+          avatarUrl: user.avatarUrl,
         },
       })
-      .from(courseReviews)
-      .leftJoin(users, eq(courseReviews.studentId, users.id))
-      .where(eq(courseReviews.courseId, course.id))
-      .orderBy(desc(courseReviews.createdAt))
+      .from(courseReview)
+      .leftJoin(user, eq(courseReview.studentId, user.id))
+      .where(eq(courseReview.courseId, course.id))
+      .orderBy(desc(courseReview.createdAt))
       .limit(10);
 
     return json({
@@ -143,6 +191,7 @@ export const GET: RequestHandler = async ({ params }) => {
         reviews: reviewsData,
       },
     });
+    */
   } catch (error) {
     console.error('Error fetching course:', error);
     return json(

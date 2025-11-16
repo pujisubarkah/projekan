@@ -1,5 +1,14 @@
 <script lang="ts">
-	import type { Project } from '$lib/types';
+	// Define the Project type locally
+	type Project = {
+		id: number;
+		title: string;
+		description: string;
+		budget: number;
+		category: string;
+		status: 'open' | 'in_progress' | 'completed';
+		createdAt: Date;
+	};
 
 	// Mock data - in production, fetch from API
 	let projects: Project[] = [

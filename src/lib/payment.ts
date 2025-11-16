@@ -1,6 +1,8 @@
 import { Xendit } from 'xendit-node';
 import { db } from './db';
-import { payments, projects, users } from './schema';
+import { projects, users } from './schema';
+// import payments from './schema' if it's a default export, or update to correct named export
+import { payments } from './schema'; // Ensure 'payments' is exported from './schema'
 import { eq } from 'drizzle-orm';
 
 const xendit = new Xendit({

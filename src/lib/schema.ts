@@ -1,5 +1,4 @@
 import { pgTable, serial, varchar, text, bigint, decimal, timestamp, pgEnum, integer, boolean, jsonb, index, uniqueIndex } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
 
 // Enums
 export const userRoleEnum = pgEnum('user_role', ['admin', 'client', 'freelancer']);
@@ -381,212 +380,6 @@ export const certificates = pgTable('certificates', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
-// Relations
-export const usersRelations = relations(users, ({ one, many }) => ({
-  role: one(roles, {
-    fields: [users.roleId],
-    references: [roles.id],
-  }),
-  projects: many(projects),
-  bids: many(bids),
-  reviewsGiven: many(reviews, { relationName: 'reviewer' }),
-  reviewsReceived: many(reviews, { relationName: 'reviewee' }),
-  forumThreads: many(forumThreads),
-  forumReplies: many(forumReplies),
-  notifications: many(notifications),
-  sessions: many(sessions),
-  userSkills: many(userSkills),
-}));
-
-export const projectsRelations = relations(projects, ({ one, many }) => ({
-  client: one(users, {
-    fields: [projects.clientId],
-    references: [users.id],
-  }),
-  category: one(categories, {
-    fields: [projects.categoryId],
-    references: [categories.id],
-  }),
-  bids: many(bids),
-  reviews: many(reviews),
-  projectSkills: many(projectSkills),
-  projectTags: many(projectTags),
-}));
-
-export const bidsRelations = relations(bids, ({ one }) => ({
-  project: one(projects, {
-    fields: [bids.projectId],
-    references: [projects.id],
-  }),
-  freelancer: one(users, {
-    fields: [bids.freelancerId],
-    references: [users.id],
-  }),
-}));
-
-export const reviewsRelations = relations(reviews, ({ one }) => ({
-  project: one(projects, {
-    fields: [reviews.projectId],
-    references: [projects.id],
-  }),
-  reviewer: one(users, {
-    fields: [reviews.reviewerId],
-    references: [users.id],
-    relationName: 'reviewer',
-  }),
-  reviewee: one(users, {
-    fields: [reviews.revieweeId],
-    references: [users.id],
-    relationName: 'reviewee',
-  }),
-}));
-
-export const forumThreadsRelations = relations(forumThreads, ({ one, many }) => ({
-  category: one(forumCategories, {
-    fields: [forumThreads.categoryId],
-    references: [forumCategories.id],
-  }),
-  user: one(users, {
-    fields: [forumThreads.userId],
-    references: [users.id],
-  }),
-  replies: many(forumReplies),
-}));
-
-export const forumRepliesRelations = relations(forumReplies, ({ one, many }) => ({
-  thread: one(forumThreads, {
-    fields: [forumReplies.threadId],
-    references: [forumReplies.id],
-  }),
-  user: one(users, {
-    fields: [forumReplies.userId],
-    references: [users.id],
-  }),
-  parentReply: one(forumReplies, {
-    fields: [forumReplies.parentReplyId],
-    references: [forumReplies.id],
-    relationName: 'parentReply',
-  }),
-  childReplies: many(forumReplies, { relationName: 'parentReply' }),
-}));
-
-export const paymentsRelations = relations(payments, ({ one }) => ({
-  project: one(projects, {
-    fields: [payments.projectId],
-    references: [projects.id],
-  }),
-  payer: one(users, {
-    fields: [payments.payerId],
-    references: [users.id],
-  }),
-  payee: one(users, {
-    fields: [payments.payeeId],
-    references: [users.id],
-  }),
-}));
-
-// LMS Relations
-export const coursesRelations = relations(courses, ({ one, many }) => ({
-  instructor: one(users, {
-    fields: [courses.instructorId],
-    references: [users.id],
-  }),
-  category: one(courseCategories, {
-    fields: [courses.categoryId],
-    references: [courseCategories.id],
-  }),
-  modules: many(courseModules),
-  enrollments: many(courseEnrollments),
-  reviews: many(courseReviews),
-}));
-
-export const courseModulesRelations = relations(courseModules, ({ one, many }) => ({
-  course: one(courses, {
-    fields: [courseModules.courseId],
-    references: [courses.id],
-  }),
-  lessons: many(courseLessons),
-}));
-
-export const courseLessonsRelations = relations(courseLessons, ({ one, many }) => ({
-  module: one(courseModules, {
-    fields: [courseLessons.moduleId],
-    references: [courseModules.id],
-  }),
-  progress: many(lessonProgress),
-  quiz: one(courseQuizzes),
-}));
-
-export const courseEnrollmentsRelations = relations(courseEnrollments, ({ one, many }) => ({
-  course: one(courses, {
-    fields: [courseEnrollments.courseId],
-    references: [courses.id],
-  }),
-  student: one(users, {
-    fields: [courseEnrollments.studentId],
-    references: [users.id],
-  }),
-  lessonProgress: many(lessonProgress),
-  quizAttempts: many(quizAttempts),
-  certificate: one(certificates),
-}));
-
-export const lessonProgressRelations = relations(lessonProgress, ({ one }) => ({
-  enrollment: one(courseEnrollments, {
-    fields: [lessonProgress.enrollmentId],
-    references: [courseEnrollments.id],
-  }),
-  lesson: one(courseLessons, {
-    fields: [lessonProgress.lessonId],
-    references: [courseLessons.id],
-  }),
-}));
-
-export const courseReviewsRelations = relations(courseReviews, ({ one }) => ({
-  course: one(courses, {
-    fields: [courseReviews.courseId],
-    references: [courses.id],
-  }),
-  student: one(users, {
-    fields: [courseReviews.studentId],
-    references: [users.id],
-  }),
-}));
-
-export const courseQuizzesRelations = relations(courseQuizzes, ({ one, many }) => ({
-  lesson: one(courseLessons, {
-    fields: [courseQuizzes.lessonId],
-    references: [courseLessons.id],
-  }),
-  questions: many(quizQuestions),
-  attempts: many(quizAttempts),
-}));
-
-export const quizQuestionsRelations = relations(quizQuestions, ({ one }) => ({
-  quiz: one(courseQuizzes, {
-    fields: [quizQuestions.quizId],
-    references: [courseQuizzes.id],
-  }),
-}));
-
-export const quizAttemptsRelations = relations(quizAttempts, ({ one }) => ({
-  enrollment: one(courseEnrollments, {
-    fields: [quizAttempts.enrollmentId],
-    references: [courseEnrollments.id],
-  }),
-  quiz: one(courseQuizzes, {
-    fields: [quizAttempts.quizId],
-    references: [courseQuizzes.id],
-  }),
-}));
-
-export const certificatesRelations = relations(certificates, ({ one }) => ({
-  enrollment: one(courseEnrollments, {
-    fields: [certificates.enrollmentId],
-    references: [courseEnrollments.id],
-  }),
-}));
-
 // Type exports
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -598,8 +391,7 @@ export type Review = typeof reviews.$inferSelect;
 export type NewReview = typeof reviews.$inferInsert;
 export type ForumThread = typeof forumThreads.$inferSelect;
 export type NewForumThread = typeof forumThreads.$inferInsert;
-export type ForumReply = typeof forumReplies.$inferSelect;
-export type NewForumReply = typeof forumReplies.$inferInsert;
+export type ForumReply = typeof forumReplies.$inferInsert;
 export type Payment = typeof payments.$inferSelect;
 export type NewPayment = typeof payments.$inferInsert;
 export type Notification = typeof notifications.$inferSelect;
@@ -612,7 +404,7 @@ export type Course = typeof courses.$inferSelect;
 export type NewCourse = typeof courses.$inferInsert;
 export type CourseModule = typeof courseModules.$inferSelect;
 export type NewCourseModule = typeof courseModules.$inferInsert;
-export type CourseLesson = typeof courseLessons.$inferSelect;
+export type CourseLesson = typeof courseLessons.$inferInsert;
 export type NewCourseLesson = typeof courseLessons.$inferInsert;
 export type CourseEnrollment = typeof courseEnrollments.$inferSelect;
 export type NewCourseEnrollment = typeof courseEnrollments.$inferInsert;

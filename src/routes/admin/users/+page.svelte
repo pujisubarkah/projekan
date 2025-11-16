@@ -20,17 +20,24 @@
 	$: currentUsers = filteredUsers.slice(startIndex, endIndex);
 
 	onMount(async () => {
-		// Mock data - in production, fetch from API
-		users = [
-			{ id: 1, name: 'Maya Sari', email: 'maya@example.com', role: 'freelancer', status: 'active', joinedAt: new Date('2024-01-10'), projects: 12 },
-			{ id: 2, name: 'Ahmad Rahman', email: 'ahmad@example.com', role: 'client', status: 'active', joinedAt: new Date('2024-01-09'), projects: 5 },
-			{ id: 3, name: 'Siti Nurhaliza', email: 'siti@example.com', role: 'freelancer', status: 'active', joinedAt: new Date('2024-01-08'), projects: 8 },
-			{ id: 4, name: 'Budi Santoso', email: 'budi@example.com', role: 'client', status: 'inactive', joinedAt: new Date('2024-01-07'), projects: 2 },
-			{ id: 5, name: 'Dewi Kartika', email: 'dewi@example.com', role: 'freelancer', status: 'active', joinedAt: new Date('2024-01-06'), projects: 15 },
-			{ id: 6, name: 'Rizky Pratama', email: 'rizky@example.com', role: 'freelancer', status: 'active', joinedAt: new Date('2024-01-05'), projects: 6 },
-			{ id: 7, name: 'Nina Amelia', email: 'nina@example.com', role: 'client', status: 'active', joinedAt: new Date('2024-01-04'), projects: 3 },
-			{ id: 8, name: 'Fajar Widodo', email: 'fajar@example.com', role: 'freelancer', status: 'suspended', joinedAt: new Date('2024-01-03'), projects: 4 },
-		];
+		try {
+			const response = await fetch('/api/users');
+			const result = await response.json();
+
+			if (result.success) {
+				users = result.data.map(user => ({
+					...user,
+					status: user.isVerified ? 'active' : 'inactive',
+					role: user.role?.name || 'client',
+					joinedAt: new Date(user.createdAt),
+					projects: 0, // TODO: Calculate from projects table
+				}));
+			} else {
+				console.error('Failed to fetch users:', result.error);
+			}
+		} catch (error) {
+			console.error('Error fetching users:', error);
+		}
 	});
 
 	function toggleUserStatus(userId: number) {
@@ -91,8 +98,9 @@
 					class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
 				>
 					<option value="all">Semua Role</option>
-					<option value="freelancer">Freelancer</option>
+					<option value="admin">Admin</option>
 					<option value="client">Client</option>
+					<option value="freelancer">Freelancer</option>
 				</select>
 			</div>
 			<div>
@@ -130,20 +138,32 @@
 						<tr>
 							<td class="px-6 py-4 whitespace-nowrap">
 								<div class="flex items-center">
-									<div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-										<span class="text-gray-600 font-medium">{user.name.charAt(0)}</span>
-									</div>
+									{#if user.avatarUrl}
+										<img src={user.avatarUrl} alt={user.name} class="w-10 h-10 rounded-full object-cover">
+									{:else}
+										<div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+											<span class="text-gray-600 font-medium">{user.name.charAt(0)}</span>
+										</div>
+									{/if}
 									<div class="ml-4">
 										<div class="text-sm font-medium text-gray-900">{user.name}</div>
 										<div class="text-sm text-gray-500">{user.email}</div>
+										{#if user.location}
+											<div class="text-xs text-gray-400">{user.location}</div>
+										{/if}
 									</div>
 								</div>
 							</td>
 							<td class="px-6 py-4 whitespace-nowrap">
 								<span class="inline-flex px-2 py-1 text-xs font-medium rounded-full
-									{user.role === 'freelancer' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}">
-									{user.role}
+									{user.role === 'freelancer' ? 'bg-blue-100 text-blue-800' :
+									 user.role === 'client' ? 'bg-green-100 text-green-800' :
+									 'bg-red-100 text-red-800'}">
+									{user.role?.label || user.role}
 								</span>
+								{#if user.rating && user.rating > 0}
+									<div class="text-xs text-gray-500 mt-1">⭐ {user.rating.toFixed(1)}</div>
+								{/if}
 							</td>
 							<td class="px-6 py-4 whitespace-nowrap">
 								<span class="inline-flex px-2 py-1 text-xs font-medium rounded-full

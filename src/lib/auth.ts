@@ -89,7 +89,7 @@ export async function authenticateUser(email: string, password: string): Promise
     avatar: user.avatarUrl || undefined,
     bio: user.bio || undefined,
     location: user.location || undefined,
-    rating: parseFloat(user.rating) || 0,
+    rating: user.rating ? Number(user.rating) : 0,
     isVerified: user.isVerified,
   };
 
@@ -117,7 +117,7 @@ export async function getUserById(id: number): Promise<User | null> {
     avatar: user.avatarUrl || undefined,
     bio: user.bio || undefined,
     location: user.location || undefined,
-    rating: parseFloat(user.rating) || 0,
+    rating: user.rating ? Number(user.rating) : 0,
     isVerified: user.isVerified,
   };
 }

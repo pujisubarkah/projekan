@@ -38,7 +38,19 @@
 				const data = await response.json();
 				localStorage.setItem('token', data.token);
 				localStorage.setItem('user', JSON.stringify(data.user));
-				goto('/dashboard');
+
+				// Redirect based on role_id
+				const roleId = data.user.roleId;
+				if (roleId === 1) {
+					// Admin
+					goto('/admin');
+				} else if (roleId === 2 || roleId === 3) {
+					// Client (2) or Freelancer (3)
+					goto('/dashboard');
+				} else {
+					// Default fallback
+					goto('/dashboard');
+				}
 			} else {
 				error = 'Email atau password salah';
 			}

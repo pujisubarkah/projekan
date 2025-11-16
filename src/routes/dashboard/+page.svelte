@@ -92,8 +92,7 @@
 	<title>Dashboard - Projekan</title>
 </svelte:head>
 
-<div class="min-h-screen bg-gray-50">
-	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
 		<!-- Page Header -->
 		<div class="mb-6 sm:mb-8">
 			<h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
@@ -177,8 +176,8 @@
 					</div>
 				</div>
 
-				<!-- Sidebar -->
-				<div class="hidden lg:block lg:col-span-1 space-y-4 sm:space-y-6">
+				<!-- Sidebar Content -->
+				<div class="lg:col-span-1 space-y-4 sm:space-y-6">
 					<!-- Stats Card -->
 					<div class="bg-white rounded-lg shadow-sm p-4 sm:p-6">
 						<h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Statistics</h3>
@@ -221,4 +220,3 @@
 			</div>
 		{/if}
 	</div>
-</div>
